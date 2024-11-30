@@ -103,7 +103,7 @@ int main()
     {
         if (semester > 3 || semester < 1)
         {
-            printf(" 올바르지않은 학년입니다")
+            printf(" 올바르지않은 학년입니다");
         }
         
     }
