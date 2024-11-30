@@ -76,40 +76,32 @@ void printSubjects(int year, int semester) {
 
    int subjectCount = sizeof(subjects) / sizeof(subjects[0]);
 
-void print(int year, int semester) {
-    for (int i = 0; i < subjectCount; i++) 
-    {
-        if (subjects[i].year == year && subjects[i].semester == semester) 
-        {
-            printf(" %s (%d학점, %s, %s)\n",
-                subjects[i].name,
-                subjects[i].score,
-                subjects[i].isRequired ? "전공필수" : "전공선택",
-                subjects[i].isDesign ? "설계과목" : "비설계과목");
+void YearAndSemester(int Year, int Semester) {
+    for (int year = FRESHMAN; year <= Year; year++) {
+        for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
+            if (year == Year && semester > Semester) break;
+
+            printf("%d학년 %d학기:\n", year, semester);
+            for (int i = 0; i < subjectCount; i++) {
+                if (subjects[i].year == year && subjects[i].semester == semester) {
+                    printf(" %-25s |", subjects[i].name);
+                }
+            }
         }
     }
 }
 
-int main() 
-{
+int main() {
     int year, semester;
 
-    printf("출력할 학년(1~4)을 입력하세요: ");
-    scanf("%d", &year);
-    printf("출력할 학기(1~2)를 입력하세요: ");
-    scanf("%d", &semester);
+    printf("학년과 학기를 입력하세요");
+    scanf("%d %d", &year, &semester);
 
-    if (year > 4 || year < 1 )
-    {
-        if (semester > 3 || semester < 1)
-        {
-            printf(" 올바르지않은 학년입니다");
-        }
-        
+    if (year < FRESHMAN || year > SENIOR || semester < SEMESTER_1 || semester > SEMESTER_2) {
+        printf("올바른 학년과 학기를 입력하세요 (1학년~4학년, 1학기~2학기).\n");
+        return 1;
     }
 
-    printf("%d학년 %d학기 과목:\n", year, semester);
-    print(year, semester);
-
+    YearAndSemester(year, semester);
     return 0;
 }
