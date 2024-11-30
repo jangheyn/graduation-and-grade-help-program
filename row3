@@ -76,13 +76,75 @@ int subjectCount = sizeof(subjects) / sizeof(subjects[0]);
 
 int Grade_Calculator(); //학점 계산기
 
+
+void printSubjectsGrid(int targetYear, int targetSemester) {
+    printf("============================================\n");
+    printf("       학년/학기별 과목 리스트\n");
+    printf("============================================\n\n");
+
+    
+    for (int year = FRESHMAN; year <= targetYear; year++) {
+        for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
+            if (year == targetYear && semester > targetSemester) break;
+            printf("  %d학년 %d학기   ", year, semester);
+        }
+    }
+    printf("\n");
+
+    
+    int maxRows = 0;
+    for (int year = FRESHMAN; year <= targetYear; year++) {
+        for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
+            if (year == targetYear && semester > targetSemester) break;
+
+            int rowCount = 0;
+            for (int i = 0; i < subjectCount; i++) {
+                if (subjects[i].year == year && subjects[i].semester == semester) {
+                    rowCount++;
+                }
+            }
+            if (rowCount > maxRows) {
+                maxRows = rowCount;
+            }
+        }
+    }
+
+    for (int row = 0; row < maxRows; row++) {
+        for (int year = FRESHMAN; year <= targetYear; year++) {
+            for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
+                if (year == targetYear && semester > targetSemester) break;
+                int printed = 0;
+                for (int i = 0; i < subjectCount; i++) {
+                    if (subjects[i].year == year && subjects[i].semester == semester) {
+                        if (row == 0) {
+                            printf("%s %s %s %s", subjects[i].name,subjects[i].isRequired ? "필수" : "선택",
+                   subjects[i].isDesign ? "설계" : "비설계",
+                   subjects[i].score);
+                            printed = 1;
+                            break;
+                        }
+                    }
+                }
+                if (!printed) {
+                    printf("               ");
+                }
+            }
+            printf("\n");
+        }
+    }
+}
+
 int main() {
     int year, semester;
 
-    printf("현재 학년을 입력하세요. (ex: 1): ");
-    scanf("%d", &year);
-    printf("현재 학기를 입력하세요. (ex: 2): ");
-    scanf("%d", &semester);
+    printf("학년과 학기를 입력하세요 (예: 2 1): ");
+    scanf("%d %d", &year, &semester);
 
+    if (year < FRESHMAN || year > SENIOR || semester < SEMESTER_1 || semester > SEMESTER_2) {
+        printf("올바른 학년과 학기를 입력하세요 (1학년~4학년, 1학기~2학기).\n");
+        return 1;
+    }
+
+    printSubjectsGrid(year, semester);
     return 0;
 }
