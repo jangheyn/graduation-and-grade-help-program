@@ -74,15 +74,60 @@ Subject subjects[] = {
 
 int subjectCount = sizeof(subjects) / sizeof(subjects[0]);
 
-int Grade_Calculator(); //학점 계산기
+void printSubjectsGrid(int year, int semester) {
+    printf("============================================\n");
+    printf("       학년/학기별 과목 리스트\n");
+    printf("============================================\n\n");
+
+    for (int y = FRESHMAN; y <= year; y++) {
+        for (int s = SEMESTER_1; s <= SEMESTER_2; s++) {
+            if (y == year && s > semester) break;
+            printf("  %d학년 %d학기   ", y, s);
+        }
+    }
+    printf("\n");
+
+    int row = 0, moreSubjects = 1;
+    while (moreSubjects) {
+        moreSubjects = 0;
+        for (int y = FRESHMAN; y <= year; y++) {
+            for (int s = SEMESTER_1; s <= SEMESTER_2; s++) {
+                if (y == year && s > semester) break;
+
+                int count = 0, found = 0;
+                for (int i = 0; i < subjectCount; i++) {
+                    if (subjects[i].year == y && subjects[i].semester == s) {
+                        if (count++ == row) {
+                            printf("%-15s", subjects[i].name);
+                            found = 1;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    printf("               ");
+                }
+                else {
+                    moreSubjects = 1;
+                }
+            }
+        }
+        printf("\n");
+        row++;
+    }
+}
 
 int main() {
     int year, semester;
 
-    printf("현재 학년을 입력하세요. (ex: 1): ");
-    scanf("%d", &year);
-    printf("현재 학기를 입력하세요. (ex: 2): ");
-    scanf("%d", &semester);
+    printf("학년과 학기를 입력하세요 (예: 2 1): ");
+    scanf("%d %d", &year, &semester);
 
+    if (year < FRESHMAN || year > SENIOR || semester < SEMESTER_1 || semester > SEMESTER_2) {
+        printf("올바른 학년과 학기를 입력하세요 (1학년~4학년, 1학기~2학기).\n");
+        return 1;
+    }
+
+    printSubjectsGrid(year, semester);
     return 0;
 }
