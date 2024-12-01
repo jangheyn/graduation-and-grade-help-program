@@ -68,124 +68,46 @@ Subject subjects[] = {
 int subjectCount = sizeof(subjects) / sizeof(subjects[0]);
 
 
-void printSubjectsGrid(int targetYear, int targetSemester) {
+void printSubjectsGrid(int year, int semester) {
     printf("============================================\n");
     printf("       학년/학기별 과목 리스트\n");
     printf("============================================\n\n");
 
-    // 헤더 출력 (학기 제목)
-    for (int year = FRESHMAN; year <= targetYear; year++) {
-        for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
-            if (year == targetYear && semester > targetSemester) break;
-            printf("  %d학년 %d학기   ", year, semester);
+    for (int y = FRESHMAN; y <= year; y++) {
+        for (int s = SEMESTER_1; s <= SEMESTER_2; s++) {
+            if (y == year && s > semester) break;
+            printf("  %d학년 %d학기   ", y, s);
         }
     }
     printf("\n");
 
-    
-    int maxRows = 0;
-    for (int year = FRESHMAN; year <= targetYear; year++) {
-        for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
-            if (year == targetYear && semester > targetSemester) break;
+    int row = 0, moreSubjects = 1;
+    while (moreSubjects) {
+        moreSubjects = 0;
+        for (int y = FRESHMAN; y <= year; y++) {
+            for (int s = SEMESTER_1; s <= SEMESTER_2; s++) {
+                if (y == year && s > semester) break;
 
-            int rowCount = 0;
-            for (int i = 0; i < subjectCount; i++) {
-                if (subjects[i].year == year && subjects[i].semester == semester) {
-                    rowCount++;
-                }
-            }
-            if (rowCount > maxRows) {
-                maxRows = rowCount;
-            }
-        }
-    }
-
-    for (int row = 0; row < maxRows; row++) {
-        for (int year = FRESHMAN; year <= targetYear; year++) {
-            for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
-                if (year == targetYear && semester > targetSemester) break;
-                int printed = 0;
+                int count = 0, found = 0;
                 for (int i = 0; i < subjectCount; i++) {
-                    if (subjects[i].year == year && subjects[i].semester == semester) {
-                        if (row == 0) {
-                            printf("%s %s %s %s", subjects[i].name,subjects[i].isRequired ? "필수" : "선택",
-                   subjects[i].isDesign ? "설계" : "비설계",
-                   subjects[i].score);
-                            printed = 1;
+                    if (subjects[i].year == y && subjects[i].semester == s) {
+                        if (count++ == row) {
+                            printf("%-15s", subjects[i].name);
+                            found = 1;
                             break;
                         }
                     }
                 }
-                if (!printed) {
+                if (!found) {
                     printf("               ");
                 }
-            }
-            printf("\n");
-        }
-    }
-}
-
-int main() {
-    int year, semester;
-
-    printf("학년과 학기를 입력하세요 (예: 2 1): ");
-    scanf("%d %d", &year, &semester);
-
-    if (year < FRESHMAN || year > SENIOR || semester 
-void printSubjectsGrid(int targetYear, int targetSemester) {
-    printf("============================================\n");
-    printf("       학년/학기별 과목 리스트\n");
-    printf("============================================\n\n");
-
-    // 헤더 출력 (학기 제목)
-    for (int year = FRESHMAN; year <= targetYear; year++) {
-        for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
-            if (year == targetYear && semester > targetSemester) break;
-            printf("  %d학년 %d학기   ", year, semester);
-        }
-    }
-    printf("\n");
-
-    
-    int maxRows = 0;
-    for (int year = FRESHMAN; year <= targetYear; year++) {
-        for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
-            if (year == targetYear && semester > targetSemester) break;
-
-            int rowCount = 0;
-            for (int i = 0; i < subjectCount; i++) {
-                if (subjects[i].year == year && subjects[i].semester == semester) {
-                    rowCount++;
+                else {
+                    moreSubjects = 1;
                 }
             }
-            if (rowCount > maxRows) {
-                maxRows = rowCount;
-            }
         }
-    }
-
-    for (int row = 0; row < maxRows; row++) {
-        for (int year = FRESHMAN; year <= targetYear; year++) {
-            for (int semester = SEMESTER_1; semester <= SEMESTER_2; semester++) {
-                if (year == targetYear && semester > targetSemester) break;
-                int printed = 0;
-                for (int i = 0; i < subjectCount; i++) {
-                    if (subjects[i].year == year && subjects[i].semester == semester) {
-                        if (row == 0) {
-                            printf("%s %s %s %s", subjects[i].name,subjects[i].isRequired ? "필수" : "선택",
-                   subjects[i].isDesign ? "설계" : "비설계",
-                   subjects[i].score);
-                            printed = 1;
-                            break;
-                        }
-                    }
-                }
-                if (!printed) {
-                    printf("               ");
-                }
-            }
-            printf("\n");
-        }
+        printf("\n");
+        row++;
     }
 }
 
