@@ -88,7 +88,7 @@ void showTakenSubjects();
 
 void printSubjectsGrid(int targetYear, int targetSemester);
 
-void choice_Subjects(int inputYear, int inputSemester);
+void choice_Subjects();
 
 
 int main() {
@@ -129,7 +129,7 @@ void choice_menu() {
 
         switch (choice) {
         case 1:
-
+ choice_Subjects();
             break;
         case 2:
             showTakenSubjects();
@@ -179,48 +179,77 @@ void printSubjectsGrid(int inputYear, int inputSemester) {
     }
 }
 
-void choice_Subjects(int inputYear, int inputSemester) {
-    char input[256]; // 사용자가 입력하는 변수
-    char seps[] = " ,\n\t"; // 분리자
+void choice_Subjects() {
+    int subject_number = 0;
+    int inrequired_sum = 0;
+    int noinrequired_sum = 0;
 
-    printf("\n이수한 과목의 번호를 공백으로 구분하여 입력하세요: ");
-    getchar(); // 입력 버퍼에 남아있는 개행 문자 제거
-    fgets(input, sizeof(input), stdin); // 사용자가 입력한 문자열을 입력받는 부분
+    printf("\n과목의 번호를 입력하시오 (종료하려면 100 입력):\n");
+    while (1) {
+        printf("과목 번호: ");
+        scanf("%d", &subject_number);
 
-    char* token = strtok(input, seps);    // 입력된 문자열 분리
-    while (token != NULL) {
-        int number = atoi(token); // 정수로 형변환
+        // 종료 조건
+        if (subject_number == 100) {
+            printf("입력이 종료되었습니다.\n");
+            break;
+        }
 
-        // 과목 번호 검증
-        if (number >= 1 && number <= TOTAL_SUBJECTS) {
-            // 해당 과목이 입력한 학년과 학기 범위 내에 있는지 확인
-            if (subjects[number - 1].year > inputYear || (subjects[number - 1].year == inputYear && subjects[number - 1].semester > inputSemester)) {
-                printf("과목 번호 %d는 입력한 학년과 학기 범위를 벗어납니다.\n", number);
-            }
-            else {
-                // 이미 선택된 과목인지 확인
-                int already_taken = 0;
-                for (int i = 0; i < taken_count; i++) {
-                    if (taken_subjects[i].number == number) {
-                        already_taken = 1;
-                        break;
+        // 입력한 과목 번호를 찾는 루프
+        int found = 0; // 과목을 찾았는지 확인
+        for (int i = 0; i < TOTAL_SUBJECTS; i++) {
+            if (subject_number == subjects[i].number) { // 과목 번호가 일치하면 처리
+                found = 1;
+
+                if (subjects[i].isRequired == REQUIRED) { // 전공 필수 과목일 경우
+                    inrequired_sum += subjects[i].score;
+                }
+                else { // 전공 선택 과목일 경우
+                    if (subject_number == 34) { // 졸업작품의 학점은 0
+                        noinrequired_sum += 0;
+                    }
+                    else if (subject_number == 37) { // 진로와취창업의 학점은 2
+                        noinrequired_sum += 2;
+                    }
+                    else {
+                        noinrequired_sum += subjects[i].score;
                     }
                 }
-                if (!already_taken) { // 중복 되지 않는다면
-                    // 선택된 과목을 taken_subjects 배열에 추가
-                    taken_subjects[taken_count++] = subjects[number - 1];
-                }
-                else {
-                    printf("과목 번호 %d는 이미 선택되었습니다.\n", number);
-                }
+                printf("%s 과목이 추가되었습니다.\n", subjects[i].name);
+                break;
             }
         }
-        else {
-            printf("유효하지 않은 과목 번호입니다: %d\n", number);
-        }
 
-        token = strtok(NULL, seps);
+        // 디버깅 출력
+        if (!found) {
+            printf("잘못된 과목 번호입니다. 다시 입력하세요.\n");
+        }
+        else {
+            printf("현재 전공 필수 학점: %d, 전공 선택 학점: %d\n", inrequired_sum, noinrequired_sum);
+        }
     }
 
-    showTakenSubjects();
+    // 졸업 요건 계산
+    int required_credits = 24;    // 전공 필수 요건
+    int elective_credits = 39;   // 전공 선택 요건
+
+    required_credits -= inrequired_sum;
+    elective_credits -= noinrequired_sum;
+
+    // 초과 학점 처리
+    if (required_credits < 0) required_credits = 0;
+    if (elective_credits < 0) elective_credits = 0;
+
+    // 최종 출력
+    if (required_credits <= 0 && elective_credits <= 0) {
+        printf("\n전공 종합설계와 졸업작품을 하셨을 경우 모든 요건을 채웠습니다.\n");
+    }
+    else {
+        if (required_credits > 0) {
+            printf("\n전공 필수가 %d 학점만큼 부족합니다.\n", required_credits);
+        }
+        if (elective_credits > 0) {
+            printf("\n전공 선택이 %d 학점만큼 부족합니다.\n", elective_credits);
+        }
+    }
 }
