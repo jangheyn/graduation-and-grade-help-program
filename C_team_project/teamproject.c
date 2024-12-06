@@ -25,7 +25,7 @@ typedef struct {
     int number;
     int year;           // 학년
     int semester;       // 학기
-    char name[50];      // 교과목명
+    char name[50];      // 과목명
     int isRequired;     // 전공필수 여부
     int isDesign;       // 설계과목 여부
     int score;          // 학점
@@ -82,11 +82,14 @@ Subject subjects[] = {
 Subject taken_subjects[TOTAL_SUBJECTS];
 int taken_count = 0;
 
-void choice_menu(int inputYear, int inputSemester);
-void modifyTakenSubjects(int inputYear, int inputSemester);
-void remove_subjects(int inputYear, int inputSemester);
+void choice_menu();
+
 void showTakenSubjects();
-void add_subject(int inputYear, int inputSemester);
+
+void printSubjectsGrid(int targetYear, int targetSemester);
+
+void choice_Subjects();
+
 
 int main() {
     int inputYear, inputSemester;
@@ -98,23 +101,18 @@ int main() {
     printf("학기를 입력해주세요(ex: 2): ");
     scanf("%d", &inputSemester);
 
-    pf = add_subject;
+    pf = printSubjectsGrid;
     pf(inputYear, inputSemester);
 
-    pf = choice_menu;
+    pf = choice_Subjects;
     pf(inputYear, inputSemester);
+
+    choice_menu();
 
     return 0;
 }
 
-void showTakenSubjects() {
-    printf("\n선택된 교과목 목록:\n");
-    for (int i = 0; i < taken_count; i++) {
-        printf("%d. %s\n", taken_subjects[i].number, taken_subjects[i].name);
-    }
-}
-
-void choice_menu(inputYear, inputSemester) {
+void choice_menu() {
     int choice;
     int* pi;
 
@@ -123,21 +121,20 @@ void choice_menu(inputYear, inputSemester) {
     while (1) {
         printf("\n======메뉴======\n");
         printf("1. 졸업 요건 확인\n");
-        printf("2. 이수한 교과목 목록 보기\n");
-        printf("3. 이수한 교과목 목록 수정\n");
+        printf("2. 이수한 과목 목록 보기\n");
+        printf("3. 이수한 과목 목록 수정\n");
         printf("4. 프로그램 종료\n");
         printf("메뉴를 선택하세요: ");
         scanf("%d", pi);
 
         switch (choice) {
         case 1:
-
+            choice_Subjects();
             break;
         case 2:
-            showTakenSubjects();
             break;
         case 3:
-            modifyTakenSubjects(inputYear, inputSemester);
+
             break;
         case 4:
             printf("프로그램을 종료합니다.\n");
@@ -149,166 +146,104 @@ void choice_menu(inputYear, inputSemester) {
     }
 }
 
-void modifyTakenSubjects(inputYear, inputSemester) {
-    int choice;
-
-    // 함수 포인터 타입 정의
-    typedef void (*SubjectFunction)(int, int);
-
-    // 함수 포인터 배열
-    SubjectFunction functions[] = { add_subject, remove_subjects };
-
-    while (1) {
-        printf("\n1. 교과목 추가\n");
-        printf("2. 교과목 제거\n");
-        printf("3. 메뉴로 돌아가기\n");
-        printf("선택하세요: ");
-        scanf("%d", &choice);
-
-        if (choice >= 1 && choice <= 2) {
-            // 함수 포인터를 사용하여 함수 호출
-            functions[choice - 1](inputYear, inputSemester);
-        }
-        else if (choice == 3) {
-            return;
-        }
-        else
-            printf("잘못된 숫자입니다.");
-    }
-}
-
-void remove_subjects(int inputYear, int inputSemester) {
-    if (taken_count == 0) {
-        printf("이수한 과목이 없습니다.\n");
-        return;
-    }
-
-    showTakenSubjects();
-
-    char input[256];
-    char seps[] = " ,\n\t"; // 분리자
-    getchar(); // 입력 버퍼 비우기
-
-    printf("\n제거할 과목의 번호를 공백으로 구분하여 입력하세요: ");
-    fgets(input, sizeof(input), stdin);
-
-    char* token = strtok(input, seps);
-    while (token != NULL) {
-        int number = atoi(token);
-
-        // 과목 번호 검증
-        if (number >= 1 && number <= TOTAL_SUBJECTS) {
-            // 과목이 선택된 과목 목록에 있는지 확인
-            int index = -1;
-            for (int i = 0; i < taken_count; i++) {
-                if (taken_subjects[i].number == number) {
-                    index = i;
-                    break;
-                }
-            }
-            if (index != -1) {
-                // 과목 제거
-                for (int i = index; i < taken_count - 1; i++) {
-                    taken_subjects[i] = taken_subjects[i + 1];
-                }
-                taken_count--;
-                printf("과목 번호 %d (%s)가 제거되었습니다.\n", number, subjects[number - 1].name);
-            }
-            else {
-                printf("과목 번호 %d는 선택된 과목 목록에 없습니다.\n", number);
-            }
-        }
-        else {
-            printf("유효하지 않은 과목 번호입니다: %d\n", number);
-        }
-
-        token = strtok(NULL, seps);
-    }
-
-    // 수정된 과목 목록 출력
-    showTakenSubjects();
-
-}
-
-void add_subject(int inputYear, int inputSemester) {
-    printf("\n추가 가능한 과목 목록:\n");
+void printSubjectsGrid(int inputYear, int inputSemester) {
     int currentYear = 0;
     int currentSemester = 0;
 
-    for (int i = 0; i < TOTAL_SUBJECTS; i++) {
+    for (int i = 0; i < TOTAL_SUBJECTS; i++) { //데이터의 순서가 정렬되어 있기 때문에 첫 과목부터 사용자가 입력한 학년과 학기까지 쭉 출력한다.
+
         // 현재 과목의 학년과 학기가 사용자 입력 범위를 초과하면 종료
-        if (subjects[i].year > inputYear || (subjects[i].year == inputYear && subjects[i].semester > inputSemester)) {
+        if (subjects[i].year > inputYear || (subjects[i].year == inputYear && subjects[i].semester > inputSemester)) { // 학년이 초과하거나 학년은 같은데 학기가 초과하는 경우
             break;
         }
 
-        // 이미 선택된 과목인지 확인
-        int already_taken = 0;
-        for (int j = 0; j < taken_count; j++) {
-            if (taken_subjects[j].number == subjects[i].number) {
-                already_taken = 1;
+        // 학년 또는 학기가 변경되면 헤더 출력
+        if (subjects[i].year != currentYear || subjects[i].semester != currentSemester) {
+            currentYear = subjects[i].year;
+            currentSemester = subjects[i].semester;
+
+            printf("\n%d학년 %d학기\n", currentYear, currentSemester);
+            printf("-------------------------------------------------------------------------------------------------------------------\n");
+        }
+
+        // 과목 정보 출력 (과목 번호 포함)
+        printf("%d. %s\n", subjects[i].number, subjects[i].name);
+    }
+}
+
+void choice_Subjects() {
+    int subject_number = 0;
+    int inrequired_sum = 0;
+    int noinrequired_sum = 0;
+
+    printf("\n과목의 번호를 입력하시오 (종료하려면 100 입력):\n");
+    while (1) {
+        printf("과목 번호: ");
+        scanf("%d", &subject_number);
+
+        // 종료 조건
+        if (subject_number == 100) {
+            printf("입력이 종료되었습니다.\n");
+            break;
+        }
+
+        // 입력한 과목 번호를 찾는 루프
+        int found = 0; // 과목을 찾았는지 확인
+        for (int i = 0; i < TOTAL_SUBJECTS; i++) {
+            if (subject_number == subjects[i].number) { // 과목 번호가 일치하면 처리
+                found = 1;
+
+                if (subjects[i].isRequired == REQUIRED) { // 전공 필수 과목일 경우
+                    inrequired_sum += subjects[i].score;
+                }
+                else { // 전공 선택 과목일 경우
+                    if (subject_number == 34) { // 졸업작품의 학점은 0
+                        noinrequired_sum += 0;
+                    }
+                    else if (subject_number == 37) { // 진로와취창업의 학점은 2
+                        noinrequired_sum += 2;
+                    }
+                    else {
+                        noinrequired_sum += subjects[i].score;
+                    }
+                }
+                printf("%s 과목이 추가되었습니다.\n", subjects[i].name);
                 break;
             }
         }
 
-        if (!already_taken) {
-            // 학년 또는 학기가 변경되면 헤더 출력
-            if (subjects[i].year != currentYear || subjects[i].semester != currentSemester) {
-                currentYear = subjects[i].year;
-                currentSemester = subjects[i].semester;
-
-                printf("\n%d학년 %d학기\n", currentYear, currentSemester);
-                printf("-------------------------------------------------------------------------------------------------------------------\n");
-            }
-
-            // 과목 정보 출력 (과목 번호 포함)
-            printf("%d. %s\n", subjects[i].number, subjects[i].name);
-        }
-    }
-
-    // 추가할 과목 번호 입력 받기
-    char input[256];
-    char seps[] = " ,\n\t"; // 분리자
-
-    printf("\n추가할 과목의 번호를 공백으로 구분하여 입력하세요: ");
-    getchar(); // 입력 버퍼에 남아있는 개행 문자 제거
-    fgets(input, sizeof(input), stdin);
-
-    char* token = strtok(input, seps);
-    while (token != NULL) {
-        int number = atoi(token);
-
-        // 과목 번호 검증
-        if (number >= 1 && number <= TOTAL_SUBJECTS) {
-            // 해당 과목이 입력한 학년과 학기 범위 내에 있는지 확인
-            if (subjects[number - 1].year > inputYear || (subjects[number - 1].year == inputYear && subjects[number - 1].semester > inputSemester)) {
-                printf("과목 번호 %d는 입력한 학년과 학기 범위를 벗어납니다.\n", number);
-            }
-            else {
-                // 이미 선택된 과목인지 확인
-                int already_taken = 0;
-                for (int i = 0; i < taken_count; i++) {
-                    if (taken_subjects[i].number == number) {
-                        already_taken = 1;
-                        break;
-                    }
-                }
-                if (!already_taken) {
-                    // 과목 추가
-                    taken_subjects[taken_count++] = subjects[number - 1];
-                    printf("과목 번호 %d (%s)가 추가되었습니다.\n", number, subjects[number - 1].name);
-                }
-                else {
-                    printf("과목 번호 %d는 이미 선택되었습니다.\n", number);
-                }
-            }
+        // 디버깅 출력
+        if (!found) {
+            printf("잘못된 과목 번호입니다. 다시 입력하세요.\n");
         }
         else {
-            printf("유효하지 않은 과목 번호입니다: %d\n", number);
+            printf("현재 전공 필수 학점: %d, 전공 선택 학점: %d\n", inrequired_sum, noinrequired_sum);
         }
-
-        token = strtok(NULL, seps);
     }
 
-    // 추가된 과목 목록 출력
-    showTakenSubjects();
+    // 졸업 요건 계산
+    int required_credits = 24;    // 전공 필수 요건
+    int elective_credits = 39;   // 전공 선택 요건
+
+    required_credits -= inrequired_sum;
+    elective_credits -= noinrequired_sum;
+
+    // 초과 학점 처리
+    if (required_credits < 0) required_credits = 0;
+    if (elective_credits < 0) elective_credits = 0;
+
+    // 최종 출력
+    if (required_credits <= 0 && elective_credits <= 0) {
+        printf("\n전공 종합설계와 졸업작품을 하셨을 경우 모든 요건을 채웠습니다.\n");
+    }
+    else {
+        if (required_credits > 0) {
+            printf("\n전공 필수가 %d 학점만큼 부족합니다.\n", required_credits);
+        }
+        if (elective_credits > 0) {
+            printf("\n전공 선택이 %d 학점만큼 부족합니다.\n", elective_credits);
+        }
+    }
+}
+
 }
