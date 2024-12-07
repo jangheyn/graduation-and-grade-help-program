@@ -193,7 +193,8 @@ void graduation_check() {
         graduation_project_passed) {
         printf("\n축하합니다 졸업 요건을 모두 충족하셨습니다!\n");
         fprintf(file, "축하합니다 졸업 요건을 모두 충족하셨습니다!\n");
-    } else {
+    }
+    else {
         printf("\n==== 졸업 요건 확인 ====\n");
         fprintf(file, "==== 졸업 요건 확인 ====\n");
 
@@ -221,6 +222,7 @@ void graduation_check() {
         printf("=========================\n");
         fprintf(file, "=========================\n");
     }
+    printf("(graduation_requirements.txt에 현재 졸업요건이 저장 됐습니다.)\n");
 
     fclose(file);
 }
