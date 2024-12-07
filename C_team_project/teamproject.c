@@ -159,6 +159,12 @@ void graduation_check() {
     int design_course2_taken = 0; // 전공종합설계(2) 이수 여부
     int graduation_project_passed = 0; // 졸업작품 심사 통과 여부
 
+    FILE* file = fopen("graduation_requirements.txt", "w");
+    if (file == NULL) {
+        printf("파일을 열 수 없습니다.\n");
+        return;
+    }
+
     // 이수한 과목 목록을 기준으로 학점 계산
     for (int i = 0; i < taken_count; i++) {
         if (taken_subjects[i].isRequired == REQUIRED) {
@@ -168,17 +174,12 @@ void graduation_check() {
             total_elective_credits += taken_subjects[i].score;
         }
 
-        // 전공종합설계(1) 체크
         if (strcmp(taken_subjects[i].name, "전공종합설계(1)") == 0) {
             design_course1_taken = 1;
         }
-
-        // 전공종합설계(2) 체크
         if (strcmp(taken_subjects[i].name, "전공종합설계(2)") == 0) {
             design_course2_taken = 1;
         }
-
-        // 졸업작품 체크
         if (strcmp(taken_subjects[i].name, "졸업작품") == 0) {
             graduation_project_passed = 1;
         }
@@ -191,38 +192,39 @@ void graduation_check() {
         design_course2_taken &&
         graduation_project_passed) {
         printf("\n축하합니다 졸업 요건을 모두 충족하셨습니다!\n");
-        return;
+        fprintf(file, "축하합니다 졸업 요건을 모두 충족하셨습니다!\n");
+    } else {
+        printf("\n==== 졸업 요건 확인 ====\n");
+        fprintf(file, "==== 졸업 요건 확인 ====\n");
+
+        if (total_required_credits < required_major_credits) {
+            printf("- 전공필수가 %d학점 부족합니다.\n", required_major_credits - total_required_credits);
+            fprintf(file, "- 전공필수가 %d학점 부족합니다.\n", required_major_credits - total_required_credits);
+        }
+        if (total_elective_credits < elective_major_credits) {
+            printf("- 전공선택이 %d학점 부족합니다.\n", elective_major_credits - total_elective_credits);
+            fprintf(file, "- 전공선택이 %d학점 부족합니다.\n", elective_major_credits - total_elective_credits);
+        }
+        if (!design_course1_taken) {
+            printf("- 전공종합설계(1)을 이수해야합니다.\n");
+            fprintf(file, "- 전공종합설계(1)을 이수해야합니다.\n");
+        }
+        if (!design_course2_taken) {
+            printf("- 전공종합설계(2)을 이수해야합니다.\n");
+            fprintf(file, "- 전공종합설계(2)을 이수해야합니다.\n");
+        }
+        if (!graduation_project_passed) {
+            printf("- 졸업작품 심사를 통과하셔야합니다.\n");
+            fprintf(file, "- 졸업작품 심사를 통과하셔야합니다.\n");
+        }
+
+        printf("=========================\n");
+        fprintf(file, "=========================\n");
     }
 
-    // 졸업 요건 부족한 항목 출력
-    printf("\n==== 졸업 요건 확인 ====\n");
-
-    // 전공필수 학점 확인
-    if (total_required_credits < required_major_credits) {
-        printf("- 전공필수가 %d학점 부족합니다.\n", required_major_credits - total_required_credits);
-    }
-
-    // 전공선택 학점 확인
-    if (total_elective_credits < elective_major_credits) {
-        printf("- 전공선택이 %d학점 부족합니다.\n", elective_major_credits - total_elective_credits);
-    }
-
-    // 전공종합설계 확인
-    if (!design_course1_taken) {
-        printf("- 전공종합설계(1)을 이수해야합니다.\n");
-    }
-    
-    if (!design_course2_taken) {
-        printf("- 전공종합설계(2)을 이수해야합니다.\n");
-    }
-
-    // 졸업작품 심사 통과 확인
-    if (!graduation_project_passed) {
-        printf("- 졸업작품 심사를 통과하셔야합니다.\n");
-    }
-
-    printf("=========================\n");
+    fclose(file);
 }
+
 
 
 
